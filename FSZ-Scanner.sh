@@ -1,10 +1,35 @@
 #!/bin/bash
 
 p="/storage/emulated/0/Download"
-p="/storage/emulated/0"
+#p="/storage/emulated/0"
+log_file="Scan_$(date -Iminutes | tr ": +" "-").txt"
+
+case $# in
+  0) echo "No option provided, running in default settings.";;
+  1)
+    if [[ $1 == "-p="* ]]; then
+      p=${1:3}
+    else
+      echo "First parameter is incorrect, please check --help"
+      exit 3
+    fi
+    ;;
+  2)
+    if [[ $1 == "-p="* ]] && [[ $2 == "-o="* ]]; then
+      p=${1:3}
+      log_file=${2:3}
+    else
+      echo "invalid arguments, please check --help"
+      exit 3
+    fi
+    ;;
+  *)
+    echo "invalid number of arguments provided, please check --help"
+    exit 3
+    ;;
+esac
 
 declare -A file_counts
-declare -A file_sizes
 
 print_file_info(){
   IFS=" "
@@ -24,7 +49,7 @@ path_handle(){
   if [ ${#file_ext[@]} -gt 1 ]; then
     local file_ext=${file_ext[-1]}
     local old_data=(${file_counts[$file_ext]})
-    local to_add="$(( ${old_data[0]}+1 )) $(( ${old_data[1]}+$new_size ))"
+    local to_add="$(( ${old_data[0]}+1 )) $(( ${old_data[1]}+10#0$new_size ))"  # 10#0 will add 0 in prefix of number in case of file size is '' so it become 0 | 10# to convert it in decimal
     file_counts[$file_ext]=$to_add
   else
     local old_data=(${file_counts["invalid"]})
@@ -32,30 +57,26 @@ path_handle(){
     file_counts["invalid"]=$to_add
   fi
   scanned=$(($scanned+1))
-  #printf -v pointer "%b" "\\033[$(( ${#file_counts[@]}+6 ))A\r"
-  #echo "$pointer"
-  #print_file_info
   echo -e "\033[6A"
-  echo -e "\033[2K <------- INFO ------->"
+  echo -e "\033[2K\033[0;32m <------- INFO ------->"
   echo -e "\033[2K Type : $file_ext"
   echo -e "\033[2K Size : $new_size B"
-  echo -e "\033[2K ${#file_counts[*]} extensions discovered."
-  echo -e "\033[2K $scanned files scanned."
+  echo -e "\033[2K\033[0;36m ${#file_counts[*]} extensions discovered."
+  echo -e "\033[2K\033[0;36m $scanned files scanned."
   IFS=$'\n'
 }
 
 old_ifs=$IFS
 IFS=$'\n'
-echo -e "\n"
+echo -e "\033[0;35mScanning into : $p"
+echo -e "\n\n\n\n\n"
 initial_time=$(date +%s.%N)
 for item in $(find $p -type f)
 do
   path_handle $item
 done
 final_time=$(date +%s.%N)
-echo -e "\nScan finished !!!"
-printf "Time taken : %.2fsec\n" $(echo "$final_time-$initial_time" | bc)
-log_file="Scan_$(date -Iminutes | tr ": +" "-").txt"
+echo -e "\n\033[0;32mScan finished !!!"
+printf "\033[0;35mTime taken : %.2fsec\n" $(echo "$final_time-$initial_time" | bc)
 print_file_info &> "$log_file"
-echo "Output have been saved in file $log_file"
-
+echo -e "\033[0;33mOutput have been saved in file \033[1;33m$log_file\033[0m"
