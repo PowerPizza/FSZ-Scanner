@@ -39,20 +39,22 @@ path_handle(){
   echo -e "\033[2K <------- INFO ------->"
   echo -e "\033[2K Type : $file_ext"
   echo -e "\033[2K Size : $new_size B"
-  echo -e "\033[2K ${#file_counts[*]} extensions discovered          "
-  echo -e "\033[2K $scanned files scanned.          "
+  echo -e "\033[2K ${#file_counts[*]} extensions discovered."
+  echo -e "\033[2K $scanned files scanned."
   IFS=$'\n'
 }
 
 old_ifs=$IFS
 IFS=$'\n'
 echo -e "\n"
+initial_time=$(date +%s.%N)
 for item in $(find $p -type f)
 do
   path_handle $item
 done
-
+final_time=$(date +%s.%N)
 echo -e "\nScan finished !!!"
+printf "Time taken : %.2fsec\n" $(echo "$final_time-$initial_time" | bc)
 log_file="Scan_$(date -Iminutes | tr ": +" "-").txt"
 print_file_info &> "$log_file"
 echo "Output have been saved in file $log_file"
