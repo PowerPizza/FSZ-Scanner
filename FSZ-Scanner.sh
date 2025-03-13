@@ -42,7 +42,7 @@ print_file_info(){
   for ext in ${!file_counts[@]}
   do
     local val_asoc=(${file_counts[$ext]})
-    echo -e "\033[2K ${val_asoc[0]} => $ext files | size $(numfmt --to=iec --suffix=B ${val_asoc[1]})"
+    echo -e "${val_asoc[0]} => $ext files | size $(numfmt --to=iec --suffix=B ${val_asoc[1]})"
   done
 }
 
@@ -71,6 +71,12 @@ path_handle(){
   echo -e "\033[2K\033[0;36m $scanned files scanned."
   IFS=$'\n'
 }
+
+ls "$p" &> /dev/null
+if [ $? -ne 0 ]; then
+  echo "Error : Given path not found"
+  exit $?
+fi
 
 old_ifs=$IFS
 IFS=$'\n'
