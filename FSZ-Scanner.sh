@@ -4,6 +4,12 @@ p="/storage/emulated/0/Download"
 #p="/storage/emulated/0"
 log_file="Scan_$(date -Iminutes | tr ": +" "-").txt"
 
+if [[ $1 == "--help" ]]
+then
+  echo -e "Syntax :\n  ./FSZ-Scanner.sh -p=\"path_to_scan\" -o=\"output_file_name\"\n\n-p : Tells the script which path to scan, if user wants to scan whole system so run the script as super-user and provide / in -p.\n\n-o : (optional) When scan completes so it will save output into a file so that user can check it or share it, user can decide output file name using this argument.\n"
+  exit 0
+fi
+
 case $# in
   0) echo "No option provided, running in default settings.";;
   1)
